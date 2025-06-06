@@ -1,0 +1,25 @@
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Jost:ital,wght@0,100..900;1,100..900&family=Merriweather:ital,opsz,wght@0,18..144,300..900;1,18..144,300..900&family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap');
+
+* {
+    font-family: "Poppins", sans-serif;
+}
+
+/* Table styles */
+table {
+    font-weight: 400; /* Regular weight */
+}
+
+table th {
+    font-weight: 500; /* Slightly bolder for headers */
+}
+
+/* Remove bold from table cells */
+table td,
+table td.fw-bold {
+    font-weight: 400 !important;
+}
+
+/* Ensure consistent font weight for badges */
+.badge {
+    font-weight: 400;
+}
