@@ -10,13 +10,15 @@ if (empty($judul) || empty($pengarang) || empty($tahun_terbit) || empty($kategor
     echo "<script>alert('Semua kolom wajib diisi!'); window.location.href='tambahbuku.php';</script>";
     exit;
 }
-$query="INSERT INTO tb_buku(judul_buku,pengarang,tahun_terbit,kategori) VALUE('$judul','$pengarang', '$tahun_terbit', '$kategori')";
+$query = mysqli_query($conn, "INSERT INTO tb_buku (judul_buku, pengarang, tahun_terbit, kategori) 
+                                VALUES ('$judul', '$pengarang', '$tahun_terbit', '$kategori')");
 
-$hasil=mysqli_query($conn, $query);
-if($hasil) {
-    header('location:index.php');
-} else{
-    echo "input gagal";
+if($query) {
+    header("location: index.php?status=success&action=tambah");
+} else {
+    echo "Gagal menambahkan data";
+    echo "<br>";
+    echo "<a href='tambahbuku.php'>Kembali</a>";
 }
 
 ?>

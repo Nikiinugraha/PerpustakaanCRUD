@@ -11,7 +11,7 @@ $query="UPDATE tb_buku SET judul_buku='$judul', pengarang='$pengarang', tahun_te
 $hasil=mysqli_query($conn,$query);
 
 if($hasil) {
-    header('location:index.php');
+    header('location:index.php?status=success&action=edit');
 } else {
     echo "Update data gagal";
 }

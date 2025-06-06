@@ -25,7 +25,88 @@ $hasil = mysqli_query ($conn, $query);
     <!-- CSS -->
      <link rel="stylesheet" href="style.css">
 
+    <!-- SweetAlert2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+
     <style>
+        /* Background Styles */
+        body {
+            min-height: 100vh;
+            background: linear-gradient(20deg, #f5f7fa 0%,rgb(164, 213, 248) 100%);
+            background-attachment: fixed;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Efek pola halus */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: radial-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px);
+            background-size: 20px 20px;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* Efek cahaya */
+        body::after {
+            content: "";
+            position: fixed;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* Card Styles */
+        .card {
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        /* Animasi halus untuk konten */
+        .container {
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Efek hover untuk tombol aksi */
+        .action-buttons .btn {
+            transition: all 0.3s ease;
+            transform: scale(1);
+        }
+
+        .action-buttons .btn:hover {
+            transform: scale(1.1);
+        }
+
+        .action-buttons .btn-warning:hover {
+            background-color: #ffc107;
+            border-color: #ffc107;
+            color: #000;
+        }
+
+        .action-buttons .btn-danger:hover {
+            background-color: #dc3545;
+            border-color: #dc3545;
+        }
+
         .action-buttons .btn {
             margin: 0 2px;
         }
@@ -47,6 +128,17 @@ $hasil = mysqli_query ($conn, $query);
             color: white;
         }
 
+        .author-text {
+            font-size: 0.8rem;
+            opacity: 0.9;
+            margin: 0.25rem 0 0 0;
+            font-weight: 400;
+            letter-spacing: 0.5px;
+        }
+
+        .card-header h1 {
+            line-height: 1.2;
+        }
     </style>
 
   </head>
@@ -56,9 +148,15 @@ $hasil = mysqli_query ($conn, $query);
             <!-- Card Header -->
             <div class="card-header py-3" style="background-color: #0F67B1 ;">
                 <div class="d-flex justify-content-between align-items-center">
-                    <h1 class="h5 mb-0 text-white">
-                        <i class="fas fa-book me-2"></i>Data Koleksi Buku
-                    </h1>
+                    <div>
+                        <h1 class="h5 mb-0 text-white">
+                            <i class="fas fa-book me-2"></i>Data Koleksi Buku
+                        </h1>
+                        <p class="text-white-50 mb-0 author-text">
+                            <i class="fas fa-user-edit me-1"></i>Niki Nugraha
+                        </p>
+                    </div>
+                    
                     <a href="tambahBuku.php" class="btn btn-light btn-sm btn-add">
                         <i class="fas fa-plus-circle me-1"></i>Tambah Buku
                     </a>
@@ -101,11 +199,11 @@ $hasil = mysqli_query ($conn, $query);
                                        title="Edit">
                                         <i class="fas fa-edit"></i>
                                     </a>
-                                    <a href="hapusbuku.php?id=<?php echo $data['id_buku']; ?>" 
+                                    <a href="#" 
                                        class="btn btn-sm btn-danger" 
                                        data-bs-toggle="tooltip" 
                                        title="Hapus"
-                                       onclick="return confirm('Apakah Anda yakin ingin menghapus buku ini?')">
+                                       onclick="return confirmDelete(<?php echo $data['id_buku']; ?>, '<?php echo isset($_GET['search']) ? htmlspecialchars($_GET['search'], ENT_QUOTES) : ''; ?>')">
                                         <i class="fas fa-trash-alt"></i>
                                     </a>
                                 </td>
@@ -128,12 +226,95 @@ $hasil = mysqli_query ($conn, $query);
 
     <!-- Bootstrap 5 JS Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- SweetAlert2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <script>
+    // Fungsi untuk konfirmasi hapus dengan SweetAlert2
+    function confirmDelete(id, searchQuery) {
+        // Simpan posisi scroll saat ini
+        const scrollPosition = window.scrollY || document.documentElement.scrollTop;
+        
+        Swal.fire({
+            title: 'Hapus Buku',
+            text: 'Apakah Anda yakin ingin menghapus buku ini?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Ya, Hapus!',
+            cancelButtonText: 'Batal',
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Simpan posisi scroll di sessionStorage sebelum redirect
+                sessionStorage.setItem('scrollPosition', scrollPosition);
+                
+                // Buat URL dengan parameter pencarian jika ada
+                let url = 'hapusbuku.php?id=' + id;
+                if (searchQuery) {
+                    url += '&search=' + encodeURIComponent(searchQuery);
+                }
+                
+                // Redirect ke halaman hapus
+                window.location.href = url;
+            }
+        });
+        
+        return false;
+    }
+    </script>
+    
+    <!-- Script untuk menampilkan notifikasi -->
+    <script>
+    // Cek jika ada parameter sukses di URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const status = urlParams.get('status');
+    const action = urlParams.get('action');
+
+    if (status === 'success') {
+        let title = '';
+        let text = '';
+        
+        if (action === 'tambah') {
+            title = 'Berhasil!';
+            text = 'Data buku berhasil ditambahkan';
+        } else if (action === 'edit') {
+            title = 'Berhasil!';
+            text = 'Data buku berhasil diperbarui';
+        } else if (action === 'hapus') {
+            title = 'Dihapus!';
+            text = 'Data buku berhasil dihapus';
+        }
+
+        if (title && text) {
+            Swal.fire({
+                icon: 'success',
+                title: title,
+                text: text,
+                showConfirmButton: false,
+                timer: 2000
+            });
+            
+            // Hapus parameter dari URL tanpa reload halaman
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+    }
+    </script>
     <script>
         // Aktifkan tooltip
         var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
         var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
             return new bootstrap.Tooltip(tooltipTriggerEl);
         });
+    </script>
+    <script>
+        // Ambil posisi scroll dari sessionStorage dan scroll ke posisi tersebut
+        const scrollPosition = sessionStorage.getItem('scrollPosition');
+        if (scrollPosition) {
+            window.scrollTo(0, parseInt(scrollPosition));
+            sessionStorage.removeItem('scrollPosition');
+        }
     </script>
   </body>
 </html>
